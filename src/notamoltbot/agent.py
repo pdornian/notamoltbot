@@ -1,7 +1,7 @@
 import requests
-from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import InMemorySaver
+from deepagents import create_deep_agent
 from langchain.tools import tool
 from dotenv import load_dotenv
 from typing import Optional
@@ -56,7 +56,7 @@ def read_and_store_markdown(url: str, storage_path: Optional[str] = None) -> str
         return f"Error saving file: {str(e)}"
 
 
-agent = create_agent(
+agent = create_deep_agent(
     model=model,
     system_prompt=SYSTEM_PROMPT,
     tools=[read_and_store_markdown],

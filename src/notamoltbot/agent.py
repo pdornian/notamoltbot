@@ -2,9 +2,12 @@ import requests
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import InMemorySaver
 from deepagents import create_deep_agent
+from deepagents.backends.utils import create_file_data
 from langchain.tools import tool
 from dotenv import load_dotenv
 from typing import Optional
+from pathlib import Path, PurePosixPath
+
 
 load_dotenv()
 SYSTEM_PROMPT = """You are a coding help agent. You will help the user write langchain tools
@@ -17,12 +20,10 @@ model = init_chat_model(
 
 checkpointer = InMemorySaver()
 
-# todo: process this to be a document and have a function to query it.
-
 
 # this doesn't restrict reading to just markdown files.
 @tool
-def read_and_store_markdown(url: str, storage_path: Optional[str] = None) -> str:
+def read_and_store_web_markdown(url: str, storage_path: Optional[str] = None) -> str:
     """
     Fetches a markdown file from a URL and optionally stores it locally.
 
@@ -56,9 +57,45 @@ def read_and_store_markdown(url: str, storage_path: Optional[str] = None) -> str
         return f"Error saving file: {str(e)}"
 
 
+def read_file(filepath: str) -> str:
+    """
+    Fetches a local file and reads its text.
+
+    Args:
+        filepath: The path of the file
+
+    Returns:
+        The file content as a string
+    """
+    try:
+        # Store locally if path provided
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            file_content_str = f.read()
+        return file_content_str
+
+    except OSError as e:
+        return f"File not found: {str(e)}"
+
+
+skill_files = {}
+# for root, dirs, files in os.walk("skills"):
+#     for name in files:
+#         # add leading slash or this explodes
+#         skill_filepath = f"/{os.path.join(root, "/", name)}"
+#         skill_files[skill_filepath] = create_file_data(read_file(skill_filepath))
+
+for root, dirs, files in Path("skills").walk():
+    for name in files:
+        # add leading slash or this explodes
+        skill_filepath = PurePosixPath(root).joinpath(name)
+        content = read_file(skill_filepath)
+        skill_files[f"/{skill_filepath}"] = create_file_data(content)
+
 agent = create_deep_agent(
     model=model,
     system_prompt=SYSTEM_PROMPT,
-    tools=[read_and_store_markdown],
+    skills=["/skills/"],
+    tools=[read_and_store_web_markdown],
     checkpointer=checkpointer,
 )

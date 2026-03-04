@@ -79,17 +79,11 @@ def read_file(filepath: str) -> str:
 
 
 skill_files = {}
-# for root, dirs, files in os.walk("skills"):
-#     for name in files:
-#         # add leading slash or this explodes
-#         skill_filepath = f"/{os.path.join(root, "/", name)}"
-#         skill_files[skill_filepath] = create_file_data(read_file(skill_filepath))
-
 for root, dirs, files in Path("skills").walk():
     for name in files:
-        # add leading slash or this explodes
         skill_filepath = PurePosixPath(root).joinpath(name)
         content = read_file(skill_filepath)
+        # add leading slash or this explodes
         skill_files[f"/{skill_filepath}"] = create_file_data(content)
 
 agent = create_deep_agent(

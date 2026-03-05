@@ -133,6 +133,8 @@ def http_request(
         }
 
 
+# this ignores any restrictions on backend filepaths. care.
+
 @tool
 def read_and_store_web_markdown(url: str, storage_path: Optional[str] = None) -> str:
     """
@@ -170,10 +172,10 @@ agent = create_deep_agent(
     skills=["/skills/"],
     tools=[read_and_store_web_markdown, http_request],
     checkpointer=checkpointer,
-    backend=FilesystemBackend(root_dir="backend", virtual_mode=True),
-    interrupt_on={
-        "write_file": True,  # Default: approve, edit, reject
-        "read_file": False,  # No interrupts needed
-        "edit_file": True,  # Default: approve, edit, reject
-    }
+    backend=FilesystemBackend(root_dir="./backend", virtual_mode=True),
+    # interrupt_on={
+    #     "write_file": True,  # Default: approve, edit, reject
+    #     "read_file": False,  # No interrupts needed
+    #     "edit_file": True,  # Default: approve, edit, reject
+    # }
 )

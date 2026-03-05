@@ -8,8 +8,7 @@ from telegram.ext import (
     filters,
     MessageHandler,
 )
-from agent import agent, skill_files
-
+from agent import agent
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,9 +35,8 @@ config = {"configurable": {"thread_id": "1"}}
 # Handle messages
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle user messages and generate responses using Langchain."""
-    user_message = {"messages": [{"role": "user", "content": update.message.text}], "files": skill_files}
+    user_message = {"messages": [{"role": "user", "content": update.message.text}]}
     response = agent.invoke(user_message, config=config)["messages"][-1]
-    print(skill_files.keys())
     await context.bot.send_message(
         chat_id=update.effective_chat.id, text=response.content
     )
